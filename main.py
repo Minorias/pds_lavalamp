@@ -45,7 +45,7 @@ class MainWindow(QWidget):
         main_grid.setSpacing(10)
 
         main_grid.addWidget(self.camera_feed, 1, 1)
-        main_grid.addWidget(self.image_stil, 2, 1)
+        main_grid.addWidget(self.image_still, 2, 1)
 
 
     def _create_button_grid(self):
@@ -56,6 +56,21 @@ class CapturedPhotoLabel(QLabel):
     def __init__(self, livestream, parent=None):
         super().__init__(parent)
         self.livestream = livestream
+        self.setFixedSize(*LIVESTREAM_LABEL_SIZE)
+        self.update_self()
+
+
+    def grab_new_image(self):
+        self.current_image = self.livestream.get_current_image()
+
+    def update_self(self):
+        self.grab_new_image()
+
+        img = self.current_image.copy()
+        img = img.resize(LIVESTREAM_LABEL_SIZE)
+        qt_image = ImageQt.ImageQt(img)
+        self.setPixmap(QPixmap.fromImage(qt_image))
+
 
 
 class LiveSteamLabel(QLabel):
