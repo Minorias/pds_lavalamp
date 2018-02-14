@@ -31,8 +31,13 @@ class MainWindow(QWidget):
     def init_UI(self):
         self.setWindowTitle("PDS CAMERA")
 
+        # Image showers
         self.camera_feed = LiveSteamLabel(self)
         self.image_still = CapturedPhotoLabel(self.camera_feed, self)
+
+        # Buttons
+        self.capture_button = QPushButton("Capture current image", self)
+        self.capture_button.clicked.connect(self.image_still.update_self)
 
         self._create_layout()
 
@@ -41,11 +46,16 @@ class MainWindow(QWidget):
 
         main_grid = QGridLayout()
         self.setLayout(main_grid)
+
         main_grid.setGeometry(QtCore.QRect(0, 0, 1920, 1080))
         main_grid.setSpacing(10)
 
         main_grid.addWidget(self.camera_feed, 1, 1)
         main_grid.addWidget(self.image_still, 2, 1)
+
+        button_grid = QGridLayout()
+        main_grid.addLayout(button_grid, 1, 2)
+        button_grid.addWidget(self.capture_button, 1, 1)
 
 
     def _create_button_grid(self):
