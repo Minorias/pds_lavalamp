@@ -19,11 +19,10 @@ from PyQt5.QtGui import QPixmap, QImage
 # Statics
 CAM_SIZE = (1920, 1080)  # Urlab cam
 CAMERA_INTERVAL = 5  # How often image will be read from cam (milliseconds)
-LIVESTREAM_LABEL_SIZE = (1300, 1300)
 
 
 class MainWindow(QWidget):
-    def __init__(self, app, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.init_UI()
         self.show()
@@ -53,12 +52,13 @@ class MainWindow(QWidget):
         main_grid.addWidget(self.camera_feed, 1, 1)
         main_grid.addWidget(self.image_still, 2, 1)
 
+        self._create_button_grid(main_grid)
+
+    def _create_button_grid(self, main_grid):
         button_grid = QGridLayout()
         main_grid.addLayout(button_grid, 1, 2)
-        button_grid.addWidget(self.capture_button, 1, 1)
 
-    def _create_button_grid(self):
-        return
+        button_grid.addWidget(self.capture_button, 1, 1)
 
 
 class CapturedPhotoLabel(QLabel):
@@ -119,5 +119,9 @@ if __name__ == '__main__':
     camera.start()
 
     app = QApplication(sys.argv)
-    main_window = MainWindow(app)
+    screen_resolution = app.desktop().screenGeometry()
+    width, height = screen_resolution.width(), screen_resolution.height()
+    LIVESTREAM_LABEL_SIZE = (width // 2, height // 2)
+
+    main_window = MainWindow()
     sys.exit(app.exec_())
