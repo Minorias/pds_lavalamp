@@ -21,6 +21,14 @@ CAM_SIZE = (1920, 1080)  # Urlab cam
 CAMERA_INTERVAL = 5  # How often image will be read from cam (milliseconds)
 
 
+def crunch_image(image):
+    # More magic to be inserted here at a later date
+    hasher = hashlib.sha256()
+    hasher.update(image.tobytes())
+
+    return hasher.hexdigest()
+
+
 class MainWindow(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -30,15 +38,20 @@ class MainWindow(QWidget):
     def init_UI(self):
         self.setWindowTitle("PDS CAMERA")
 
-        # Image showers
+        # Information showers
         self.camera_feed = LiveSteamLabel(self)
-        self.image_still = CapturedPhotoLabel(self.camera_feed, self)
-
+        self.image_still = CapturedPhotoLabel(self)
+        self.number_dispay = NumberLabel(self)
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
-        self.capture_button.clicked.connect(self.image_still.update_self)
+        self.capture_button.clicked.connect(self._update_labels)
 
         self._create_layout()
+
+    def _update_labels(self):
+        img = self.camera_feed.get_current_image()
+        self.image_still.update(img)
+        self.number_dispay.update(img)
 
     def _create_layout(self):
         self.setGeometry(0, 0, 1920, 1080)
@@ -51,6 +64,7 @@ class MainWindow(QWidget):
 
         main_grid.addWidget(self.camera_feed, 1, 1)
         main_grid.addWidget(self.image_still, 2, 1)
+        main_grid.addWidget(self.number_dispay, 2, 2)
 
         self._create_button_grid(main_grid)
 
@@ -61,19 +75,22 @@ class MainWindow(QWidget):
         button_grid.addWidget(self.capture_button, 1, 1)
 
 
-class CapturedPhotoLabel(QLabel):
-    def __init__(self, livestream, parent=None):
+class NumberLabel(QLabel):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.livestream = livestream
+        self.setText("4")  # https://xkcd.com/221/
+
+    def update(self, image):
+        self.setText(crunch_image(image))
+
+
+class CapturedPhotoLabel(QLabel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
         self.setFixedSize(*LIVESTREAM_LABEL_SIZE)
-        self.update_self()
 
-    def grab_new_image(self):
-        self.current_image = self.livestream.get_current_image()
-
-    def update_self(self):
-        self.grab_new_image()
-
+    def update(self, image):
+        self.current_image = image
         img = self.current_image.copy()
         img = img.resize(LIVESTREAM_LABEL_SIZE)
         qt_image = ImageQt.ImageQt(img)
@@ -121,7 +138,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     screen_resolution = app.desktop().screenGeometry()
     width, height = screen_resolution.width(), screen_resolution.height()
-    LIVESTREAM_LABEL_SIZE = (width // 2, height // 2)
+    LIVESTREAM_LABEL_SIZE = (width // 2 - 50, height // 2 - 50)
 
     main_window = MainWindow()
     sys.exit(app.exec_())
