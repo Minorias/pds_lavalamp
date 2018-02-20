@@ -13,7 +13,7 @@ import pygame.camera
 # Pyqt5
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QMainWindow, QLabel
 from PyQt5 import QtCore
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QFont
 
 
 # Statics
@@ -40,8 +40,8 @@ class MainWindow(QWidget):
 
         # Information showers
         self.camera_feed = LiveSteamLabel(self)
-        self.image_still = CapturedPhotoLabel(self)
         self.number_dispay = NumberLabel(self)
+        self.image_still = CapturedPhotoLabel(self)
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
         self.capture_button.clicked.connect(self._update_labels)
@@ -78,16 +78,20 @@ class MainWindow(QWidget):
 class NumberLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setText("4")  # https://xkcd.com/221/
+
+        self.setFont(QFont("Comic Sans", 20, QFont.Bold))
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setText("Random number:\n4")  # https://xkcd.com/221/
 
     def update(self, image):
-        self.setText(crunch_image(image))
+        self.setText("Random number:\n"+crunch_image(image))
 
 
 class CapturedPhotoLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(*LIVESTREAM_LABEL_SIZE)
+        self.update(Image.open("placeholder.jpg").convert(mode="RGBA"))
 
     def update(self, image):
         self.current_image = image
