@@ -16,7 +16,7 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QImage, QFont
 
 # My imports
-from graph import Graph
+from graph import DotGraph, LineGraph
 
 
 # Statics
@@ -45,7 +45,7 @@ class MainWindow(QWidget):
         self.camera_feed = LiveSteamLabel(self)
         self.number_dispay = NumberLabel(self)
         self.image_still = CapturedPhotoLabel(self)
-        self.dot_graph = Graph(self)
+        self.dot_graph = LineGraph(self)
 
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
@@ -54,12 +54,15 @@ class MainWindow(QWidget):
         self._create_layout()
 
     def _update_labels(self):
-        img = self.camera_feed.get_current_image()
-        new_string = crunch_image(img)
+        try:
+            img = self.camera_feed.get_current_image()
+            new_string = crunch_image(img)
 
-        self.image_still.update(img)
-        self.number_dispay.update(new_string)
-        self.dot_graph.addvalue(int(new_string, 16) % 100)
+            self.image_still.update(img)
+            self.number_dispay.update(new_string)
+            self.dot_graph.addvalue(int(new_string, 16) % 100)
+        finally:
+            QtCore.QTimer.singleShot(5, self._update_labels)
 
     def _create_layout(self):
         self.setGeometry(0, 0, 1920, 1080)
