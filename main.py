@@ -21,6 +21,7 @@ from graph import DotGraph, LineGraph
 
 # Statics
 CAM_SIZE = (1920, 1080)  # Urlab cam
+SCREEN_RESOLUTION = (1920, 1080)
 CAMERA_INTERVAL = 5  # How often image will be read from cam (milliseconds)
 
 
@@ -65,12 +66,12 @@ class MainWindow(QWidget):
             QtCore.QTimer.singleShot(5, self._update_labels)
 
     def _create_layout(self):
-        self.setGeometry(0, 0, 1920, 1080)
+        self.setGeometry(0, 0, *SCREEN_RESOLUTION)
 
         main_grid = QGridLayout()
         self.setLayout(main_grid)
 
-        main_grid.setGeometry(QtCore.QRect(0, 0, 1920, 1080))
+        main_grid.setGeometry(QtCore.QRect(0, 0, *SCREEN_RESOLUTION))
         main_grid.setSpacing(10)
 
         main_grid.addWidget(self.camera_feed, 1, 1)
