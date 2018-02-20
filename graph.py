@@ -8,8 +8,9 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSize
 import numpy as np
 import random as rand
 
+
 class Graph(FigureCanvas):
-    def __init__(self, parent = None, width = 5, height = 4, dpi = 100):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
 
@@ -17,8 +18,8 @@ class Graph(FigureCanvas):
         self.setParent(parent)
 
         FigureCanvas.setSizePolicy(self,
-                QSizePolicy.Expanding,
-                QSizePolicy.Expanding)
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
         plt.ion()
 
@@ -30,11 +31,10 @@ class Graph(FigureCanvas):
         ax = self.figure.add_subplot(111)
         ax.yaxis.set_major_locator(MaxNLocator(nbins=1, integer=True))
         self.figure.canvas.draw()
-        self.addvalue()
+        self.addvalue(ax)
 
-
-    def addvalue(self, value = None):
-        if value != None:
+    def addvalue(self, ax, value=None):
+        if value is not None:
             self.numbers.append(value)
             freq = [self.numbers.count(i) for i in self.numbers]
             ax.plot(self.numbers, freq, ".")
