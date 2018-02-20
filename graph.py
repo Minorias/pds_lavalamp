@@ -23,19 +23,19 @@ class Graph(FigureCanvas):
         FigureCanvas.updateGeometry(self)
         plt.ion()
 
-        self.max_number = 10
         self.numbers = []
         self.plot()
 
     def plot(self):
-        ax = self.figure.add_subplot(111)
-        ax.yaxis.set_major_locator(MaxNLocator(nbins=1, integer=True))
+        self.ax = self.figure.add_subplot(111)
+        self.ax.yaxis.set_major_locator(MaxNLocator(nbins=1, integer=True))
         self.figure.canvas.draw()
-        self.addvalue(ax)
 
-    def addvalue(self, ax, value=None):
+    def addvalue(self, value=None):
         if value is not None:
+            if value == 0:
+                value = 100
             self.numbers.append(value)
             freq = [self.numbers.count(i) for i in self.numbers]
-            ax.plot(self.numbers, freq, ".")
+            self.ax.plot(self.numbers, freq, ".")
             self.figure.canvas.draw()

@@ -15,6 +15,9 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QMa
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QImage, QFont
 
+# My imports
+from graph import Graph
+
 
 # Statics
 CAM_SIZE = (1920, 1080)  # Urlab cam
@@ -42,6 +45,8 @@ class MainWindow(QWidget):
         self.camera_feed = LiveSteamLabel(self)
         self.number_dispay = NumberLabel(self)
         self.image_still = CapturedPhotoLabel(self)
+        self.dot_graph = Graph(self)
+
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
         self.capture_button.clicked.connect(self._update_labels)
@@ -50,8 +55,11 @@ class MainWindow(QWidget):
 
     def _update_labels(self):
         img = self.camera_feed.get_current_image()
+        new_string = crunch_image(img)
+
         self.image_still.update(img)
-        self.number_dispay.update(img)
+        self.number_dispay.update(new_string)
+        self.dot_graph.addvalue(int(new_string, 16) % 100)
 
     def _create_layout(self):
         self.setGeometry(0, 0, 1920, 1080)
@@ -63,14 +71,16 @@ class MainWindow(QWidget):
         main_grid.setSpacing(10)
 
         main_grid.addWidget(self.camera_feed, 1, 1)
-        main_grid.addWidget(self.image_still, 2, 1)
-        main_grid.addWidget(self.number_dispay, 2, 2)
+        main_grid.addWidget(self.dot_graph, 1, 2)
+
+        main_grid.addWidget(self.image_still, 3, 1)
+        main_grid.addWidget(self.number_dispay, 3, 2)
 
         self._create_button_grid(main_grid)
 
     def _create_button_grid(self, main_grid):
         button_grid = QGridLayout()
-        main_grid.addLayout(button_grid, 1, 2)
+        main_grid.addLayout(button_grid, 2, 2)
 
         button_grid.addWidget(self.capture_button, 1, 1)
 
@@ -83,8 +93,8 @@ class NumberLabel(QLabel):
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setText("Random number:\n4")  # https://xkcd.com/221/
 
-    def update(self, image):
-        self.setText("Random number:\n"+crunch_image(image))
+    def update(self, new_string):
+        self.setText("Random number:\n"+new_string)
 
 
 class CapturedPhotoLabel(QLabel):
