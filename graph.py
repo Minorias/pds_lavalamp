@@ -3,10 +3,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QVBoxLayout, QSizePolicy, QMessageBox, QWidget, QPushButton
-
-import numpy as np
-import random as rand
+from PyQt5.QtWidgets import QSizePolicy
 
 
 class Graph(FigureCanvas):
@@ -23,6 +20,7 @@ class Graph(FigureCanvas):
         FigureCanvas.updateGeometry(self)
         plt.ion()
 
+        self.max_number = 100
         self.numbers = []
         self.plot()
 
@@ -30,6 +28,11 @@ class Graph(FigureCanvas):
         self.ax = self.figure.add_subplot(111)
         self.ax.yaxis.set_major_locator(MaxNLocator(nbins=1, integer=True))
         self.figure.canvas.draw()
+
+
+class DotGraph(Graph):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
     def addvalue(self, value=None):
         if value is not None:
@@ -39,3 +42,19 @@ class Graph(FigureCanvas):
             freq = [self.numbers.count(i) for i in self.numbers]
             self.ax.plot(self.numbers, freq, ".")
             self.figure.canvas.draw()
+
+
+class LineGraph(Graph):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.line = [0 for i in range(1, self.max_number + 1)]
+
+    def addvalue(self, value=None):
+        if value is not None:
+            if value == 0:
+                value = 100
+        self.line[value-1] += 1
+        self.numbers.append(value)
+        self.ax.clear()
+        self.ax.plot(self.line)
+        self.figure.canvas.draw()
