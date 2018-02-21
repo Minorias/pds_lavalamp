@@ -41,29 +41,44 @@ class MainWindow(QWidget):
 
     def init_UI(self):
         self.setWindowTitle("PDS CAMERA")
+        self.dot_graph_shown = True
 
         # Information showers
         self.camera_feed = LiveSteamLabel(self)
         self.number_dispay = NumberLabel(self)
         self.image_still = CapturedPhotoLabel(self)
-        self.dot_graph = LineGraph(self)
+        self.line_graph = LineGraph(self)
+        self.dot_graph = DotGraph(self)
 
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
         self.capture_button.clicked.connect(self._update_labels)
+        self.toggle_button = QPushButton("Toggle other graph", self)
+        self.toggle_button.clicked.connect(self._switch_graphs)
 
         self._create_layout()
 
-    def _update_labels(self):
-        try:
-            img = self.camera_feed.get_current_image()
-            new_string = crunch_image(img)
+    def _switch_graphs(self):
+        if self.dot_graph_shown:
+            self.dot_graph_shown = False
+            self.dot_graph.hide()
+            self.line_graph.show()
+        else:
+            self.dot_graph_shown = True
+            self.line_graph.hide()
+            self.dot_graph.show()
 
-            self.image_still.update(img)
-            self.number_dispay.update(new_string)
-            self.dot_graph.addvalue(int(new_string, 16) % 100)
-        finally:
-            QtCore.QTimer.singleShot(5, self._update_labels)
+    def _update_labels(self):
+        # try:
+        img = self.camera_feed.get_current_image()
+        new_string = crunch_image(img)
+
+        self.image_still.update(img)
+        self.number_dispay.update(new_string)
+        self.line_graph.addvalue(int(new_string, 16) % 100)
+        self.dot_graph.addvalue(int(new_string, 16) % 100)
+        # finally:
+        #     QtCore.QTimer.singleShot(5, self._update_labels)
 
     def _create_layout(self):
         self.setGeometry(0, 0, *SCREEN_RESOLUTION)
@@ -75,11 +90,12 @@ class MainWindow(QWidget):
         main_grid.setSpacing(10)
 
         main_grid.addWidget(self.camera_feed, 1, 1)
+        main_grid.addWidget(self.line_graph, 1, 2)
         main_grid.addWidget(self.dot_graph, 1, 2)
-
         main_grid.addWidget(self.image_still, 3, 1)
         main_grid.addWidget(self.number_dispay, 3, 2)
 
+        self.line_graph.hide()
         self._create_button_grid(main_grid)
 
     def _create_button_grid(self, main_grid):
@@ -87,6 +103,7 @@ class MainWindow(QWidget):
         main_grid.addLayout(button_grid, 2, 2)
 
         button_grid.addWidget(self.capture_button, 1, 1)
+        button_grid.addWidget(self.toggle_button, 1, 2)
 
 
 class NumberLabel(QLabel):
