@@ -20,7 +20,7 @@ class Graph(FigureCanvas):
         FigureCanvas.updateGeometry(self)
         plt.ion()
 
-        self.max_number = 100
+        self.max_number = 2**8
         self.numbers = []
         self.plot()
 
@@ -37,7 +37,7 @@ class DotGraph(Graph):
     def addvalue(self, value=None):
         if value is not None:
             if value == 0:
-                value = 100
+                value = self.max_number
             self.numbers.append(value)
             freq = [self.numbers.count(i) for i in self.numbers]
             self.ax.plot(self.numbers, freq, ".")
@@ -52,7 +52,7 @@ class LineGraph(Graph):
     def addvalue(self, value=None):
         if value is not None:
             if value == 0:
-                value = 100
+                value = self.max_number
         self.line[value-1] += 1
         self.numbers.append(value)
         self.ax.clear()

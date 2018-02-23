@@ -18,19 +18,29 @@ from PyQt5.QtGui import QPixmap, QImage, QFont
 # My imports
 from graph import DotGraph, LineGraph
 
+#pseudo random number generator
+from random import Random
+
+#cv2
+import cv2 as cv
 
 # Statics
-CAM_SIZE = (1920, 1080)  # Urlab cam
-SCREEN_RESOLUTION = (1920, 1080)
+NUMBER_RANGE = 2**8
+CAM_SIZE = (1080, 720)  # Urlab cam
+SCREEN_RESOLUTION = (1600, 900)
 CAMERA_INTERVAL = 5  # How often image will be read from cam (milliseconds)
 
 
 def crunch_image(image):
     # More magic to be inserted here at a later date
     hasher = hashlib.sha256()
-    hasher.update(image.tobytes())
+    hasher.update( image.tobytes() )
+    hashed = int( hasher.hexdigest() , 16)
+    rng = Random()
+    rng.seed(hashed)
+    value = rng.randint(0,NUMBER_RANGE)
+    return value
 
-    return hasher.hexdigest()
 
 
 class MainWindow(QWidget):
@@ -69,16 +79,15 @@ class MainWindow(QWidget):
             self.dot_graph.show()
 
     def _update_labels(self):
-        # try:
-        img = self.camera_feed.get_current_image()
-        new_string = crunch_image(img)
-
-        self.image_still.update(img)
-        self.number_dispay.update(new_string)
-        self.line_graph.addvalue(int(new_string, 16) % 100)
-        self.dot_graph.addvalue(int(new_string, 16) % 100)
-        # finally:
-        #     QtCore.QTimer.singleShot(5, self._update_labels)
+        try:
+            img = self.camera_feed.get_current_image()
+            value = crunch_image(img)
+            self.image_still.update(img)
+            self.number_dispay.update( value )
+            self.line_graph.addvalue( value  )
+            self.dot_graph.addvalue( value )
+        finally:
+            QtCore.QTimer.singleShot(100, self._update_labels)
 
     def _create_layout(self):
         self.setGeometry(0, 0, *SCREEN_RESOLUTION)
@@ -114,8 +123,8 @@ class NumberLabel(QLabel):
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setText("Random number:\n4")  # https://xkcd.com/221/
 
-    def update(self, new_string):
-        self.setText("Random number:\n"+new_string)
+    def update(self, value):
+        self.setText("Random number:\n"+ str(value) )
 
 
 class CapturedPhotoLabel(QLabel):
@@ -135,24 +144,37 @@ class CapturedPhotoLabel(QLabel):
 class LiveSteamLabel(QLabel):
     def __init__(self, parent):
         super().__init__(parent)
+        self.cap = cv.VideoCapture("test.mpg")
         self.update_it()
         self.setFixedSize(*LIVESTREAM_LABEL_SIZE)
         self.show()
 
     def get_new_pixmap(self):
+        '''
         camera_image = camera.get_image()
 
         pil_string_image = pygame.image.tostring(camera_image, "RGBA", False)
         pil_image = Image.frombytes("RGBA", CAM_SIZE, pil_string_image)
         self.current_image = pil_image.copy()
-
         pil_image = pil_image.resize(LIVESTREAM_LABEL_SIZE)
         qt_image = ImageQt.ImageQt(pil_image)
+        '''
+
+        try:
+            ret, frame = self.cap.read()
+
+            self.current_image = Image.fromarray(frame).copy()
+
+            height, width, channel = frame.shape
+            bytesPerLine = 3 * width
+            qt_image = QImage(frame.data, width, height, bytesPerLine, QImage.Format_RGB888)
+        except:
+            pass
 
         return QPixmap.fromImage(qt_image)
 
     def get_current_image(self):
-        return self.current_image
+        return self.current_image.copy()
 
     def update_it(self):
         try:
@@ -164,15 +186,17 @@ class LiveSteamLabel(QLabel):
 if __name__ == '__main__':
     # Pygame magic setup
     pygame.init()
+    '''
     pygame.camera.init()
 
     all_cams = pygame.camera.list_cameras()
     camera = pygame.camera.Camera(all_cams[-1], CAM_SIZE)
     camera.start()
-
+    '''
     app = QApplication(sys.argv)
     screen_resolution = app.desktop().screenGeometry()
     width, height = screen_resolution.width(), screen_resolution.height()
+    SCREEN_RESOLUTION = width, height
     LIVESTREAM_LABEL_SIZE = (width // 2 - 50, height // 2 - 50)
 
     main_window = MainWindow()
