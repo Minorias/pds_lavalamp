@@ -33,13 +33,15 @@ class Graph(FigureCanvas):
 class DotGraph(Graph):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.line = {}
 
     def addvalue(self, value=None):
         if value is not None:
-            if value == 0:
-                value = 100
             self.numbers.append(value)
-            freq = [self.numbers.count(i) for i in self.numbers]
+            if value not in self.line:
+                self.line[value] = 0
+            self.line[value] += 1
+            freq = [self.line[i] for i in self.numbers]
             self.ax.plot(self.numbers, freq, ".")
             self.figure.canvas.draw()
 
