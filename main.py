@@ -73,10 +73,18 @@ class MainWindow(QWidget):
         img = self.camera_feed.get_current_image()
         new_string = crunch_image(img)
 
+        for i in range(0, len(new_string), 2):
+            new_num = int(new_string[i:i+2], 16) % 128
+            if new_num < 100:
+                break
+        else:
+            new_num = 4  # The probability of this happening is (1 - 100/128)^32 = 7.556800800174977e-22
+
+        new_num += 1
         self.image_still.update(img)
         self.number_dispay.update(new_string)
-        self.line_graph.addvalue(int(new_string, 16) % 100)
-        self.dot_graph.addvalue(int(new_string, 16) % 100)
+        self.line_graph.addvalue(new_num)
+        # self.dot_graph.addvalue(new_num)
         # finally:
         #     QtCore.QTimer.singleShot(5, self._update_labels)
 
