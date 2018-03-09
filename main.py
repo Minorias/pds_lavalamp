@@ -1,5 +1,4 @@
 # Misc
-import time
 import hashlib
 import sys
 
@@ -11,9 +10,9 @@ import pygame
 import pygame.camera
 
 # Pyqt5
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QGridLayout, QLabel
 from PyQt5 import QtCore
-from PyQt5.QtGui import QPixmap, QImage, QFont
+from PyQt5.QtGui import QPixmap, QFont
 
 # My imports
 from graph import DotGraph, LineGraph
@@ -78,13 +77,13 @@ class MainWindow(QWidget):
             if new_num < 100:
                 break
         else:
-            new_num = 4  # The probability of this happening is (1 - 100/128)^32 = 7.556800800174977e-22
+            new_num = 4  # The probability of this happening is (1 - 100/128)^32 = 7.557e-22
 
-        new_num += 1
+        new_num += 1  # Mapping from 1-100 is nicer than 0-99
         self.image_still.update(img)
-        self.number_dispay.update(new_string)
+        self.number_dispay.update(new_string, new_num)
         self.line_graph.addvalue(new_num)
-        # self.dot_graph.addvalue(new_num)
+        self.dot_graph.addvalue(new_num)
         # finally:
         #     QtCore.QTimer.singleShot(5, self._update_labels)
 
@@ -120,10 +119,10 @@ class NumberLabel(QLabel):
 
         self.setFont(QFont("Comic Sans", 20, QFont.Bold))
         self.setAlignment(QtCore.Qt.AlignCenter)
-        self.setText("Random number:\n4")  # https://xkcd.com/221/
+        self.setText("Random bytes:\n4"+"\n\nRandom number:\n4")  # https://xkcd.com/221/
 
-    def update(self, new_string):
-        self.setText("Random number:\n"+new_string)
+    def update(self, new_string, new_number):
+        self.setText("Random bytes:\n{}\n\nRandom number:\n{}".format(new_string, new_number))
 
 
 class CapturedPhotoLabel(QLabel):
