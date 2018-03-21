@@ -40,14 +40,14 @@ class MainWindow(QWidget):
 
     def init_UI(self):
         self.setWindowTitle("PDS CAMERA")
-        self.dot_graph_shown = True
+        # self.dot_graph_shown = True
 
         # Information showers
         self.camera_feed = LiveSteamLabel(self)
         self.number_dispay = NumberLabel(self)
         self.image_still = CapturedPhotoLabel(self)
         self.line_graph = LineGraph(self)
-        self.dot_graph = DotGraph(self)
+        # self.dot_graph = DotGraph(self)
 
         # Buttons
         self.capture_button = QPushButton("Capture current image", self)
@@ -58,34 +58,35 @@ class MainWindow(QWidget):
         self._create_layout()
 
     def _switch_graphs(self):
-        if self.dot_graph_shown:
-            self.dot_graph_shown = False
-            self.dot_graph.hide()
-            self.line_graph.show()
-        else:
-            self.dot_graph_shown = True
-            self.line_graph.hide()
-            self.dot_graph.show()
+        return
+        # # if self.dot_graph_shown:
+        #     # self.dot_graph_shown = False
+        #     # self.dot_graph.hide()
+        #     self.line_graph.show()
+        # else:
+        #     # self.dot_graph_shown = True
+        #     self.line_graph.hide()
+        #     # self.dot_graph.show()
 
     def _update_labels(self):
-        # try:
-        img = self.camera_feed.get_current_image()
-        new_string = crunch_image(img)
+        try:
+            img = self.camera_feed.get_current_image()
+            new_string = crunch_image(img)
 
-        for i in range(0, len(new_string), 2):
-            new_num = int(new_string[i:i+2], 16) % 128
-            if new_num < 100:
-                break
-        else:
-            new_num = 4  # The probability of this happening is (1 - 100/128)^32 = 7.557e-22
+            for i in range(0, len(new_string), 2):
+                new_num = int(new_string[i:i+2], 16) % 128
+                if new_num < 100:
+                    break
+            else:
+                new_num = 4  # The probability of this happening is (1 - 100/128)^32 = 7.557e-22
 
-        new_num += 1  # Mapping from 1-100 is nicer than 0-99
-        self.image_still.update(img)
-        self.number_dispay.update(new_string, new_num)
-        self.line_graph.addvalue(new_num)
-        self.dot_graph.addvalue(new_num)
-        # finally:
-        #     QtCore.QTimer.singleShot(5, self._update_labels)
+            new_num += 1  # Mapping from 1-100 is nicer than 0-99
+            self.image_still.update(img)
+            self.number_dispay.update(new_string, new_num)
+            self.line_graph.addvalue(new_num)
+            # self.dot_graph.addvalue(new_num)
+        finally:
+            QtCore.QTimer.singleShot(2000, self._update_labels)
 
     def _create_layout(self):
         self.setGeometry(0, 0, *SCREEN_RESOLUTION)
@@ -98,11 +99,11 @@ class MainWindow(QWidget):
 
         main_grid.addWidget(self.camera_feed, 1, 1)
         main_grid.addWidget(self.line_graph, 1, 2)
-        main_grid.addWidget(self.dot_graph, 1, 2)
+        # main_grid.addWidget(self.dot_graph, 1, 2)
         main_grid.addWidget(self.image_still, 3, 1)
         main_grid.addWidget(self.number_dispay, 3, 2)
 
-        self.line_graph.hide()
+        # self.line_graph.hide()
         self._create_button_grid(main_grid)
 
     def _create_button_grid(self, main_grid):
